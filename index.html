@@ -118,7 +118,7 @@
       const response = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
         method: 'POST',
         body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'text/plain' }
       });
 
       if (response.ok) {
