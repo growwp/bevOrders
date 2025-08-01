@@ -105,6 +105,10 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    document.getElementById('loading').style.display = 'block';
+
     const name = form.name.value;
     const rows = container.querySelectorAll('.product-row');
     const items = Array.from(rows).map(row => ({
@@ -113,45 +117,54 @@
     })).filter(item => item.product && item.quantity);
 
     // Preview first: send to backend to get calculated total
-    const preview = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ name, items })
-    });
-    const result = await preview.json();
-
-    const summary = items.map(i =>
-      `${i.quantity} × ${i.product} ($${PRODUCTS[i.product].toFixed(2)})`
-    ).join('\n');
-
-    const confirmOrder = confirm(`Review your order:\n\n${summary}\n\nTotal: $${result.total.toFixed(2)}\n\nPlace order?`);
-
-    if (!confirmOrder) return;
-
-    // Re-submit (or remove this if backend already saves on first POST)
-    const response = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ name, items, save: true })
-    });
-
-    if (response.ok) {
-      alert('Order submitted!');
-      form.reset();
-      container.innerHTML = '';
-      productCount = 0;
-      addProductRow();
-      updateTotal();
-    } else {
-      alert('Failed to submit order.');
+    try {
+      const preview = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ name, items })
+      });
+      const result = await preview.json();
+  
+      const summary = items.map(i =>
+        `${i.quantity} × ${i.product} ($${PRODUCTS[i.product].toFixed(2)})`
+      ).join('\n');
+  
+      const confirmOrder = confirm(`Review your order:\n\n${summary}\n\nTotal: $${result.total.toFixed(2)}\n\nPlace order?`);
+  
+      if (!confirmOrder) return;
+  
+      // Re-submit (or remove this if backend already saves on first POST)
+      const response = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ name, items, save: true })
+      });
+  
+      if (response.ok) {
+        alert('Order submitted!');
+        form.reset();
+        container.innerHTML = '';
+        productCount = 0;
+        addProductRow();
+        updateTotal();
+      } else {
+        alert('Failed to submit order.');
+      }
+    } catch (err) {
+      alert('❌ An error occurred while processing your order.');
+      console.error(err);
     }
+    submitButton.disabled = false;
+    document.getElementById('loading').style.display = 'none';
   });
 
   addBtn.addEventListener('click', addProductRow);
   loadPrices(); // kick off
  
 </script>
+  <div id="loading" style="display:none;">⏳ Processing...</div>
 </body>
 </html>
+
 
 
