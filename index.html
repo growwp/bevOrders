@@ -55,7 +55,7 @@
       dropdown.innerHTML = '<option value="">Select a product</option>' +
         productList.map(p =>
           !selected.includes(p) || p === current
-            ? `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`
+            ? `<option value="${p}" ${p === current ? 'selected' : ''}>${p} ($${PRODUCTS[p].toFixed(2)})</option>`
             : ''
         ).join('');
     });
@@ -74,7 +74,7 @@
       <label>Product:
         <select class="product-dropdown" required>
           <option value="">Select a product</option>
-          ${productList.map(p => `<option value="${p}">${p}</option>`).join('')}
+          ${productList.map(p => `<option value="${p}">${p} ($${PRODUCTS[p].toFixed(2)})</option>`).join('')}
         </select>
       </label>
       <label>Qty:
@@ -153,4 +153,5 @@
 </script>
 </body>
 </html>
+
 
