@@ -31,6 +31,10 @@
       <div class="invalid-feedback">Please enter your name.</div>
     </div>
 
+    <div id="product-loading-msg" class="alert alert-info" role="alert">
+      Loading product list, please wait...
+    </div>
+
     <div id="items-container"></div>
 
     <div class="mb-3">
@@ -92,6 +96,7 @@ async function loadPrices() {
   PRODUCTS = await res.json();
   productList = Object.keys(PRODUCTS);
   addProductRow();
+  document.getElementById('product-loading-msg').remove();
 }
 
 function updateTotal() {
@@ -238,3 +243,4 @@ loadPrices();
 </script>
 </body>
 </html>
+
