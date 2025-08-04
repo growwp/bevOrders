@@ -222,6 +222,7 @@ form.addEventListener('submit', async (e) => {
       })
     });
     const result = await preview.json();
+    console.log("🔁 Preview response", result);
     //pendingOrder = { name, items, total: result.total };
     const total = result.total || result.resumen?.total || 0;
     pendingOrder = { name, promo, items, total };
@@ -283,6 +284,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
