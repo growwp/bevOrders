@@ -122,7 +122,7 @@ function updateDropdowns() {
   container.querySelectorAll('.product-dropdown').forEach(dropdown => {
     const current = dropdown.value;
     dropdown.innerHTML =
-      '<option value="" disabled hidden>Selecciona un producto</option>' +
+      '<option value="" disabled ${isEmpty ? 'selected' : ''}>Selecciona un producto</option>' +
       productList.map(p =>
         !selected.includes(p) || p === current
           ? `<option value="${p}" ${p === current ? 'selected' : ''}>${p} ($${PRODUCTS[p].toFixed(2)})</option>`
@@ -249,6 +249,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
