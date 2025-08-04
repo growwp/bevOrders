@@ -202,8 +202,9 @@ form.addEventListener('submit', async (e) => {
 
   const rows = container.querySelectorAll('.product-row');
   const items = Array.from(rows).map(row => ({
-    product: row.querySelector('select').value,
-    quantity: parseInt(row.querySelector('input').value)
+    codigoProducto: row.querySelector('select').value,
+    cantidad: parseInt(row.querySelector('input').value),
+    promo: promo
   })).filter(item => item.product && item.quantity);
 
   loadingIndicator.classList.remove('d-none');
@@ -284,6 +285,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
