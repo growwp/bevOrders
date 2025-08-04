@@ -26,13 +26,13 @@
 
   <form id="order-form" novalidate>
     <div class="mb-3">
-      <label for="name" class="form-label">Your Name</label>
+      <label for="name" class="form-label">Ingresa tu Nombre o CodigoCliente</label>
       <input type="text" class="form-control" name="name" id="name" required />
-      <div class="invalid-feedback">Please enter your name.</div>
+      <div class="invalid-feedback">Por favor ingresa tu Nombre o CodigoCliente.</div>
     </div>
 
     <div id="product-loading-msg" class="alert alert-info" role="alert">
-      Loading product list, please wait...
+      Cargando productos...
     </div>
 
     <div id="items-container"></div>
@@ -41,6 +41,11 @@
       <button type="button" id="add-btn" class="btn btn-outline-primary">
         ➕ Add Another Product
       </button>
+    </div>
+
+    <div class="mb-3">
+      <label for="promo" class="form-label">Código Promo (Optional)</label>
+      <input type="text" class="form-control" name="promo" id="promo" />
     </div>
 
     <h4>Total: $<span id="total-cost">0.00</span></h4>
@@ -136,9 +141,9 @@ function addProductRow() {
 
   div.innerHTML = `
     <div class="col-md-6 mb-2">
-      <label class="form-label">Product</label>
+      <label class="form-label">Producto</label>
       <select class="form-select product-dropdown" required>
-        <option value="">Select a product</option>
+        <option value="">Selecciona un producto</option>
         ${productList.map(p => `<option value="${p}">${p} ($${PRODUCTS[p].toFixed(2)})</option>`).join('')}
       </select>
     </div>
@@ -147,7 +152,7 @@ function addProductRow() {
       <input type="number" class="form-control" min="1" value="1" required />
     </div>
     <div class="col-md-3 mb-2">
-      <button type="button" class="btn btn-outline-danger remove-btn w-100">❌ Remove</button>
+      <button type="button" class="btn btn-outline-danger remove-btn w-100">❌ Remover</button>
     </div>
   `;
 
@@ -243,4 +248,5 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
