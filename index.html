@@ -215,7 +215,9 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({ name, promo, items })
     });
     const result = await preview.json();
-    pendingOrder = { name, items, total: result.total };
+    //pendingOrder = { name, items, total: result.total };
+    const total = result.total || result.resumen?.total || 0;
+    pendingOrder = { name, promo, items, total };
 
   summaryBox.innerHTML = `
     <ul class="list-group mb-3">
@@ -226,7 +228,7 @@ form.addEventListener('submit', async (e) => {
     </ul>
     ${promo ? `<p><strong>Codigo Promo:</strong> ${escapeHTML(promo)}</p>` : ''}
     <p><strong>Cliente:</strong> ${escapeHTML(name)}</p>
-    <strong>Total: $${result.total.toFixed(2)}</strong>
+    <p><strong>Total:</strong> $${total.toFixed(2)}</p>
   `;
 
     previewModal.show();
@@ -274,6 +276,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
