@@ -271,7 +271,8 @@ confirmBtn.addEventListener('click', async () => {
     });
 
     if (response.ok) {
-      alert("✅ Order submitted!");
+      const data = await response.json();
+      alert(`✅ Su Orden (${data.numeroOrden}) fue recibida`);
       form.reset();
       container.innerHTML = '';
       productCount = 0;
@@ -295,6 +296,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
