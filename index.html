@@ -39,18 +39,18 @@
 
     <div class="mb-3">
       <button type="button" id="add-btn" class="btn btn-outline-primary">
-        ➕ Add Another Product
+        ➕ Añadir Producto
       </button>
     </div>
 
     <div class="mb-3">
-      <label for="promo" class="form-label">Código Promo (Optional)</label>
+      <label for="promo" class="form-label">Codigo Promo (Optional)</label>
       <input type="text" class="form-control" name="promo" id="promo" />
     </div>
 
     <h4>Total: $<span id="total-cost">0.00</span></h4>
 
-    <button type="submit" class="btn btn-success mt-2">Submit Order</button>
+    <button type="submit" class="btn btn-success mt-2">Ordenar</button>
     
     <div id="loading" class="mt-3 d-none">
       <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
@@ -64,13 +64,13 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="orderPreviewLabel">Confirm Your Order</h5>
+        <h5 class="modal-title" id="orderPreviewLabel">Confirma tu Pedido</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="order-summary-text"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
-        <button type="button" class="btn btn-primary" id="confirm-submit">Place Order</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cambiar</button>
+        <button type="button" class="btn btn-primary" id="confirm-submit">Comprar</button>
       </div>
     </div>
   </div>
@@ -248,6 +248,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
