@@ -83,7 +83,18 @@
 <!-- Bootstrap JS + Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- escape HTML -->
 <script>
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }[m]));
+}
+
 let PRODUCTS = {};
 let productList = [];
 const MAX_ITEMS = 3;
@@ -185,7 +196,9 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const name = form.name.value.trim();
-  if (!name) return alert('Please enter your name.');
+  if (!name) return alert('Porfavor ingresa tu nombre.');
+
+  const promo = form.promo.value.trim();
 
   const rows = container.querySelectorAll('.product-row');
   const items = Array.from(rows).map(row => ({
@@ -199,17 +212,23 @@ form.addEventListener('submit', async (e) => {
     const preview = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ name, items })
+      body: JSON.stringify({ name, promo, items })
     });
     const result = await preview.json();
     pendingOrder = { name, items, total: result.total };
 
-    summaryBox.innerHTML = `
-      <ul class="list-group mb-3">
-        ${items.map(i => `<li class="list-group-item">${i.quantity} × ${i.product} ($${PRODUCTS[i.product].toFixed(2)})</li>`).join('')}
-      </ul>
-      <strong>Total: $${result.total.toFixed(2)}</strong>
-    `;
+  summaryBox.innerHTML = `
+    <ul class="list-group mb-3">
+      ${items.map(i => `
+        <li class="list-group-item">
+          ${escapeHTML(i.quantity.toString())} × ${escapeHTML(i.product)} ($${PRODUCTS[i.product].toFixed(2)})
+        </li>`).join('')}
+    </ul>
+    ${promo ? `<p><strong>Codigo Promo:</strong> ${escapeHTML(promo)}</p>` : ''}
+    <p><strong>Cliente:</strong> ${escapeHTML(name)}</p>
+    <strong>Total: $${result.total.toFixed(2)}</strong>
+  `;
+
     previewModal.show();
   } catch (err) {
     alert("❌ Failed to preview order.");
@@ -255,6 +274,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
