@@ -232,7 +232,7 @@ form.addEventListener('submit', async (e) => {
     <ul class="list-group mb-3">
       ${items.map(i => `
         <li class="list-group-item">
-          ${escapeHTML(i.cantidad.toString())} × ${escapeHTML(PRODUCTS[i.codigoProducto].descripcion)} ($${PRODUCTS[i.product].precio.toFixed(2)})
+          ${escapeHTML(i.cantidad.toString())} × ${escapeHTML(PRODUCTS[i.codigoProducto].descripcion)} ($${PRODUCTS[i.codigoProducto].precio.toFixed(2)})
         </li>`).join('')}
     </ul>
     ${promo ? `<p><strong>Codigo Promo:</strong> ${escapeHTML(promo)}</p>` : ''}
@@ -285,6 +285,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
