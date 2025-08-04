@@ -141,7 +141,7 @@ function updateDropdowns() {
       `<option value="" disabled selected>Selecciona un producto</option>` +
       productList.map(p =>
         !selected.includes(p) || p === current
-          ? `<option value="${p}" ${p === current ? 'selected' : ''}>${p} ($${PRODUCTS[p].toFixed(2)})</option>`
+          ? `<option value="${p}" ${p === current ? 'selected' : ''}>${PRODUCTS[p].descripcion} ($${PRODUCTS[p].precio.toFixed(2)})</option>`
           : ''
       ).join('');
   });
@@ -162,7 +162,7 @@ function addProductRow() {
       <label class="form-label">Cual quereis?</label>
       <select class="form-select product-dropdown" required>
         <option value="">Selecciona un producto</option>
-        ${productList.map(p => `<option value="${p}">${p} ($${PRODUCTS[p].toFixed(2)})</option>`).join('')}
+        ${productList.map(p => `<option value="${p}">${PRODUCTS[p].descripcion} ($${PRODUCTS[p].precio.toFixed(2)})</option>`).join('')}
       </select>
     </div>
     <div class="col-md-3 mb-2">
