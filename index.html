@@ -112,7 +112,7 @@ let productCount = 0;
 let pendingOrder = {};
 
 async function loadPrices() {
-  const res = await fetch('https://script.google.com/macros/s/AKfycbydUeZb5XTuqaRO8nO9Q1MVSOCi_jXDVK6Rmp3P4rRxLeNF4qtUrtLdjUbwehvdmZwR/exec');
+  const res = await fetch('https://script.google.com/macros/s/AKfycbzojVW0HEGO19GUIusnpwd78lx04saSydSwtaz0PKsqm8JBVFy6LV8xdAXBCNiTTjLEGw/exec');
   PRODUCTS = await res.json();
   productList = Object.keys(PRODUCTS);
   addProductRow();
@@ -274,6 +274,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
