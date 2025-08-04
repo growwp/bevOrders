@@ -124,7 +124,7 @@ function updateTotal() {
   container.querySelectorAll('.product-row').forEach(row => {
     const productName = row.querySelector('select').value;
     const qty = parseFloat(row.querySelector('input').value || 0);
-    const price = PRODUCTS[productName] || 0;
+    const price = PRODUCTS[productName]?.precio || 0;
     total += price * qty;
   });
   totalCostDisplay.textContent = total.toFixed(2);
@@ -274,6 +274,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
