@@ -121,14 +121,16 @@ function updateDropdowns() {
 
   container.querySelectorAll('.product-dropdown').forEach(dropdown => {
     const current = dropdown.value;
+    const isEmpty = !current || !productList.includes(current);
     dropdown.innerHTML =
-      '<option value="" disabled ${isEmpty ? 'selected' : ''}>Selecciona un producto</option>' +
+      `<option value="" disabled ${isEmpty ? 'selected' : ''}>Selecciona un producto</option>` +
       productList.map(p =>
         !selected.includes(p) || p === current
           ? `<option value="${p}" ${p === current ? 'selected' : ''}>${p} ($${PRODUCTS[p].toFixed(2)})</option>`
           : ''
       ).join('');
-});
+  });
+
 }
 
 function addProductRow() {
@@ -249,6 +251,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
