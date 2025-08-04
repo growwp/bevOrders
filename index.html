@@ -141,14 +141,14 @@ function addProductRow() {
 
   div.innerHTML = `
     <div class="col-md-6 mb-2">
-      <label class="form-label">Producto</label>
+      <label class="form-label">Cual quereis?</label>
       <select class="form-select product-dropdown" required>
         <option value="">Selecciona un producto</option>
         ${productList.map(p => `<option value="${p}">${p} ($${PRODUCTS[p].toFixed(2)})</option>`).join('')}
       </select>
     </div>
     <div class="col-md-3 mb-2">
-      <label class="form-label">Qty</label>
+      <label class="form-label">Cuantas Cajas?</label>
       <input type="number" class="form-control" min="1" value="1" required />
     </div>
     <div class="col-md-3 mb-2">
@@ -248,6 +248,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
