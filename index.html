@@ -227,7 +227,14 @@ form.addEventListener('submit', async (e) => {
     console.log("🔁 Preview response", result);
     //pendingOrder = { name, items, total: result.total };
     const total = result.total || result.resumen?.total || 0;
-    pendingOrder = { name, promo, items, total };
+    pendingOrder = { 
+      cliente: name, 
+      telefono: "0000000000",
+      promo, 
+      items: result.articulos,
+      token: result.token,
+      total: result.total 
+    };
 
   summaryBox.innerHTML = `
     <ul class="list-group mb-3">
@@ -288,6 +295,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
