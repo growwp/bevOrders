@@ -212,7 +212,14 @@ form.addEventListener('submit', async (e) => {
     const preview = await fetch('https://script.google.com/macros/s/AKfycbzojVW0HEGO19GUIusnpwd78lx04saSydSwtaz0PKsqm8JBVFy6LV8xdAXBCNiTTjLEGw/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ name, promo, items })
+      body: JSON.stringify({ 
+        cliente: name, 
+        telefono: "0000000000",
+        promo, 
+        items,
+        preview: true,
+        save: false
+      })
     });
     const result = await preview.json();
     //pendingOrder = { name, items, total: result.total };
@@ -276,6 +283,7 @@ loadPrices();
 </script>
 </body>
 </html>
+
 
 
 
