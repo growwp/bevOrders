@@ -231,7 +231,7 @@ function addProductRow() {
     updateTotal();
   });
 }
-
+//Form SUBMIT
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -264,8 +264,9 @@ form.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ 
         codigoCliente: currentClient?.codigoCliente || '',
-        cliente: name, 
+        nombre: currentClient?.nombre || '', 
         telefono,
+        codigoVendedor: currentClient?.codigoVendedor || '',
         promo, 
         items,
         preview: true,
@@ -278,8 +279,9 @@ form.addEventListener('submit', async (e) => {
     const total = result.total || result.resumen?.total || 0;
     pendingOrder = { 
       codigoCliente: currentClient.codigoCliente,
-      cliente: currentClient.nombre, 
+      nombre: currentClient.nombre, 
       telefono: currentClient.telefono,
+      codigoVendedor: currentClient.codigoVendedor,
       promo, 
       items: result.articulos,
       token: result.token,
@@ -389,6 +391,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
