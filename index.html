@@ -339,6 +339,16 @@ confirmBtn.addEventListener('click', async () => {
 });
 
 addBtn.addEventListener('click', addProductRow);
+
+// Prefill login fields from URL parameters if present
+const params = new URLSearchParams(window.location.search);
+if (params.has('cliente')) {
+  document.getElementById('codigoCliente').value = params.get('cliente');
+}
+if (params.has('telefono')) {
+  document.getElementById('telefonoCliente').value = params.get('telefono');
+}
+
   
 // ✅ LOGIN HANDLER
 document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -392,6 +402,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
