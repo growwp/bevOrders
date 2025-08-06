@@ -381,6 +381,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
       //Call load prices
       loadPrices();
     } else {
+      console.error("❌ Backend responded but login failed:", result);
       alert("❌ Cliente no encontrado. Verifica los datos.");
     }
   } catch (err) {
@@ -391,6 +392,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
