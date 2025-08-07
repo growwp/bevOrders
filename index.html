@@ -64,14 +64,19 @@
       <div id="product-loading-msg" class="alert alert-info" role="alert">
         Cargando productos...
       </div>
-  
-      <div id="items-container"></div>
-  
+
       <div class="mb-3">
-        <button type="button" id="add-btn" class="btn btn-outline-primary">
-          ➕ Añadir Producto
-        </button>
+        <h5>Selecciona tus Productos</h5>
+        <div id="product-grid" class="row g-3">
+          <!-- Tiles will be injected here -->
+        </div>
       </div>
+
+      <div class="mb-3">
+        <h5>Tu Pedido</h5>
+        <ul id="order-summary" class="list-group"></ul>
+      </div>
+
   
       <div class="mb-3">
         <label for="promo" class="form-label">Codigo Promo (Optional)</label>
@@ -107,6 +112,33 @@
   </div>
 </div>
 
+<!-- Modal for tiles -->
+<div class="modal fade" id="presentationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Selecciona Presentaciones</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div><strong id="modal-product-name"></strong></div>
+        <div class="row mt-3">
+          <div class="col-6">1LT</div>
+          <div class="col-6"><input type="number" class="form-control" id="qty-1lt" min="0" value="0"></div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-6">500ML</div>
+          <div class="col-6"><input type="number" class="form-control" id="qty-500ml" min="0" value="0"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" id="confirm-quantity-btn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Bootstrap JS + Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -124,13 +156,12 @@ function escapeHTML(str) {
 
 //Order reset form
 function resetOrderForm() {
-  form.reset();
-  container.innerHTML = '';
-  productCount = 0;
+
   pendingOrder = {};
   form.promo.value = '';
-  addProductRow();
-  updateTotal();
+  //Products Dropdown
+  //addProductRow();
+  //updateTotal();
   previewModal.hide();
 }
 
@@ -140,97 +171,105 @@ let currentClient = null; //Will hold authenticated client info
 const MAX_ITEMS = 3;
 
 const form = document.getElementById('order-form');
-const container = document.getElementById('items-container');
-const addBtn = document.getElementById('add-btn');
+//dropdown logic
+//const addBtn = document.getElementById('add-btn');
 const totalCostDisplay = document.getElementById('total-cost');
 const loadingIndicator = document.getElementById('loading');
 const previewModal = new bootstrap.Modal(document.getElementById('orderPreviewModal'));
 const confirmBtn = document.getElementById('confirm-submit');
 const summaryBox = document.getElementById('order-summary-text');
-
-let productCount = 0;
+  
 let pendingOrder = {};
 
 async function loadPrices() {
   const res = await fetch('https://script.google.com/macros/s/AKfycbzojVW0HEGO19GUIusnpwd78lx04saSydSwtaz0PKsqm8JBVFy6LV8xdAXBCNiTTjLEGw/exec');
   PRODUCTS = await res.json();
   productList = Object.keys(PRODUCTS);
-  addProductRow();
+  //Dropdown
+  //addProductRow();
+  //Tiles
+  renderProductTiles();
   document.getElementById('product-loading-msg').remove();
 }
 
-function updateTotal() {
-  let total = 0;
-  container.querySelectorAll('.product-row').forEach(row => {
-    const productName = row.querySelector('select').value;
-    const qty = parseFloat(row.querySelector('input').value || 0);
-    const price = PRODUCTS[productName]?.precio || 0;
-    total += price * qty;
+//Render Tiles
+const productGrid = document.getElementById('product-grid');
+const presentationModal = new bootstrap.Modal(document.getElementById('presentationModal'));
+let selectedProducts = {}; // { P1: { '1LT': qty, '500ML': qty } }
+
+function renderProductTiles() {
+  productGrid.innerHTML = '';
+  productList.forEach(code => {
+    const tile = document.createElement('div');
+    tile.className = 'col-4';
+    tile.innerHTML = `
+      <div class="card product-tile ${selectedProducts[code] ? 'border-primary' : ''}" data-code="${code}" style="cursor:pointer;">
+        <div class="card-body text-center">
+          <h5 class="card-title">${PRODUCTS[code].descripcion}</h5>
+        </div>
+      </div>
+    `;
+    tile.querySelector('.product-tile').addEventListener('click', () => openPresentationModal(code));
+    productGrid.appendChild(tile);
   });
-  totalCostDisplay.textContent = total.toFixed(2);
 }
 
-function updateDropdowns() {
-  const selected = Array.from(container.querySelectorAll('.product-dropdown'))
-    .map(drop => drop.value).filter(Boolean);
+let currentProductCode = null;
 
-  container.querySelectorAll('.product-dropdown').forEach(dropdown => {
-    const current = dropdown.value;
-    const isEmpty = !current || !productList.includes(current);
-    dropdown.innerHTML =
-      `<option value="" disabled selected>Selecciona un producto</option>` +
-      productList.map(p =>
-        !selected.includes(p) || p === current
-          ? `<option value="${p}" ${p === current ? 'selected' : ''}>${PRODUCTS[p].descripcion} ($${PRODUCTS[p].precio.toFixed(2)})</option>`
-          : ''
-      ).join('');
-  });
-
+function openPresentationModal(code) {
+  currentProductCode = code;
+  document.getElementById('modal-product-name').textContent = PRODUCTS[code].descripcion;
+  document.getElementById('qty-1lt').value = selectedProducts[code]?.['1LT'] || 0;
+  document.getElementById('qty-500ml').value = selectedProducts[code]?.['500ML'] || 0;
+  presentationModal.show();
 }
 
-function addProductRow() {
-  if (productCount >= MAX_ITEMS) {
-    alert("Maximum of 3 products allowed.");
-    return;
+document.getElementById('confirm-quantity-btn').addEventListener('click', () => {
+  const q1 = parseInt(document.getElementById('qty-1lt').value || 0);
+  const q2 = parseInt(document.getElementById('qty-500ml').value || 0);
+
+  if (q1 === 0 && q2 === 0) {
+    delete selectedProducts[currentProductCode];
+  } else {
+    selectedProducts[currentProductCode] = {
+      '1LT': q1,
+      '500ML': q2
+    };
   }
 
-  const div = document.createElement('div');
-  div.className = 'product-row row align-items-end';
+  updateOrderSummary();
+  renderProductTiles(); // Re-render to update tile border
+  presentationModal.hide();
+});
 
-  div.innerHTML = `
-    <div class="col-md-6 mb-2">
-      <label class="form-label">Cual quereis?</label>
-      <select class="form-select product-dropdown" required>
-        <option value="">Selecciona un producto</option>
-        ${productList.map(p => `<option value="${p}">${PRODUCTS[p].descripcion} ($${PRODUCTS[p].precio.toFixed(2)})</option>`).join('')}
-      </select>
-    </div>
-    <div class="col-md-3 mb-2">
-      <label class="form-label">Cuantas Cajas?</label>
-      <input type="number" class="form-control" min="1" value="1" required />
-    </div>
-    <div class="col-md-3 mb-2">
-      <button type="button" class="btn btn-outline-danger remove-btn w-100">❌ Remover</button>
-    </div>
-  `;
+function updateOrderSummary() {
+  const orderSummary = document.getElementById('order-summary');
+  orderSummary.innerHTML = '';
 
-  container.appendChild(div);
-  productCount++;
-  updateDropdowns();
-  updateTotal();
-
-  div.querySelector('select').addEventListener('change', () => {
-    updateDropdowns();
-    updateTotal();
+  Object.entries(selectedProducts).forEach(([code, qtys]) => {
+    const item = PRODUCTS[code];
+    if (qtys['1LT'] > 0) {
+      orderSummary.innerHTML += `<li class="list-group-item">
+        ${qtys['1LT']} × ${item.descripcion} (1LT) - $${(item.precio * qtys['1LT']).toFixed(2)}
+      </li>`;
+    }
+    if (qtys['500ML'] > 0) {
+      orderSummary.innerHTML += `<li class="list-group-item">
+        ${qtys['500ML']} × ${item.descripcion} (500ML) - $${(item.precio * qtys['500ML']).toFixed(2)}
+      </li>`;
+    }
   });
-  div.querySelector('input').addEventListener('input', updateTotal);
-  div.querySelector('.remove-btn').addEventListener('click', () => {
-    container.removeChild(div);
-    productCount--;
-    updateDropdowns();
-    updateTotal();
-  });
+
+  // Optional: update total cost
+  let total = 0;
+  for (let code in selectedProducts) {
+    const item = PRODUCTS[code];
+    total += item.precio * (selectedProducts[code]['1LT'] || 0);
+    total += item.precio * (selectedProducts[code]['500ML'] || 0);
+  }
+  document.getElementById('total-cost').textContent = total.toFixed(2);
 }
+
 //Form SUBMIT
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -241,15 +280,28 @@ form.addEventListener('submit', async (e) => {
 
   const promo = form.promo.value.trim();
 
-  const rows = container.querySelectorAll('.product-row');
-  const items = Array.from(rows).map(row => ({
-    codigoProducto: row.querySelector('select').value,
-    cantidad: parseInt(row.querySelector('input').value)
-  })).filter(item => item.codigoProducto && item.cantidad);
+  const items = [];
+
+  for (let code in selectedProducts) {
+    const entry = selectedProducts[code];
+    if (entry['1LT'] > 0) {
+      items.push({ codigoProducto: code, cantidad: entry['1LT'], presentacion: '1LT' });
+    }
+    if (entry['500ML'] > 0) {
+      items.push({ codigoProducto: code, cantidad: entry['500ML'], presentacion: '500ML' });
+    }
+  }  
+
+  // ✅ ADD THIS CHECK HERE
+  if (items.length === 0) {
+    alert("Debes seleccionar al menos un producto.");
+    return;
+  }
 
   // ✅ Check for duplicate products
-  const selectedCodes = items.map(i => i.codigoProducto);
-  const hasDuplicates = new Set(selectedCodes).size !== selectedCodes.length;
+  const itemKeys = items.map(i => `${i.codigoProducto}-${i.presentacion}`);
+  const hasDuplicates = new Set(itemKeys).size !== itemKeys.length;
+
   if (hasDuplicates) {
     alert("No puedes seleccionar el mismo producto más de una vez.");
     return;
@@ -337,8 +389,8 @@ confirmBtn.addEventListener('click', async () => {
     loadingIndicator.classList.add('d-none');
   }
 });
-
-addBtn.addEventListener('click', addProductRow);
+//Dropdown Logic
+//addBtn.addEventListener('click', addProductRow);
 
 // Prefill login fields from URL parameters if present
 const params = new URLSearchParams(window.location.search);
@@ -402,6 +454,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
