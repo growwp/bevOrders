@@ -123,12 +123,16 @@
       <div class="modal-body">
         <div><strong id="modal-product-name"></strong></div>
         <div class="row mt-3">
-          <div class="col-6">1LT</div>
-          <div class="col-6"><input type="number" class="form-control" id="qty-1lt" min="0" value="0"></div>
+          <div class="col-6" id="label-1lt">1.5 Lts</div>
+          <div class="col-6">
+            <input type="number" class="form-control" id="qty-1lt" min="0" value="0" />
+          </div>
         </div>
         <div class="row mt-2">
-          <div class="col-6">500ML</div>
-          <div class="col-6"><input type="number" class="form-control" id="qty-500ml" min="0" value="0"></div>
+          <div class="col-6" id="label-500ml">500 ml</div>
+          <div class="col-6">
+            <input type="number" class="form-control" id="qty-500ml" min="0" value="0" />
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -158,15 +162,16 @@ function escapeHTML(str) {
 function resetOrderForm() {
 
   pendingOrder = {};
+  selectedProducts = {};
   form.promo.value = '';
-  //Products Dropdown
-  //addProductRow();
-  //updateTotal();
+  updateOrderSummary(); // 🧠 Reset summary
+  renderProductTiles(); // 🧠 Un-highlight tiles
   previewModal.hide();
 }
 
 let PRODUCTS = {};
 let productList = [];
+let FLAVOR_MAP = {};
 let currentClient = null; //Will hold authenticated client info
 const MAX_ITEMS = 3;
 
@@ -184,10 +189,29 @@ let pendingOrder = {};
 async function loadPrices() {
   const res = await fetch('https://script.google.com/macros/s/AKfycbzojVW0HEGO19GUIusnpwd78lx04saSydSwtaz0PKsqm8JBVFy6LV8xdAXBCNiTTjLEGw/exec');
   PRODUCTS = await res.json();
-  productList = Object.keys(PRODUCTS);
-  //Dropdown
-  //addProductRow();
-  //Tiles
+
+  // ✅ Defensive check if no products were loaded
+  if (!Object.keys(PRODUCTS).length) {
+    alert("No se pudieron cargar los productos.");
+    return;
+  }
+  
+  //Map list of products to one tile
+  // Group products into FLAVORS
+  const flavorMap = {};  // { 'MANZANA': { '1.5 Lts': {…}, '500 ml': {…} } }
+  
+  for (const code in PRODUCTS) {
+    const p = PRODUCTS[code];
+    const parts = p.descripcion.split(' ');
+    const flavor = parts[1]; // Assumes format: "FRUGY MANZANA PET 1.5 Lts"
+    const size = parts.slice(-2).join(' '); // "1.5 Lts" or "500 ml"
+  
+    if (!flavorMap[flavor]) flavorMap[flavor] = {};
+    flavorMap[flavor][size] = { ...p, codigoProducto: code };
+  }
+
+  FLAVOR_MAP = flavorMap;       // ✅ Store globally
+  productList = Object.keys(flavorMap);
   renderProductTiles();
   document.getElementById('product-loading-msg').remove();
 }
@@ -195,32 +219,47 @@ async function loadPrices() {
 //Render Tiles
 const productGrid = document.getElementById('product-grid');
 const presentationModal = new bootstrap.Modal(document.getElementById('presentationModal'));
-let selectedProducts = {}; // { P1: { '1LT': qty, '500ML': qty } }
+let selectedProducts = {}; // { flavor: { size: { cantidad, codigoProducto } } }
 
 function renderProductTiles() {
   productGrid.innerHTML = '';
-  productList.forEach(code => {
+  productList.forEach(flavor => {
     const tile = document.createElement('div');
     tile.className = 'col-4';
+    const hasSelection = selectedProducts[flavor];
+
     tile.innerHTML = `
-      <div class="card product-tile ${selectedProducts[code] ? 'border-primary' : ''}" data-code="${code}" style="cursor:pointer;">
+      <div class="card product-tile ${hasSelection ? 'border-primary' : ''}" data-flavor="${flavor}" style="cursor:pointer;">
         <div class="card-body text-center">
-          <h5 class="card-title">${PRODUCTS[code].descripcion}</h5>
+          <h5 class="card-title">${flavor}</h5>
         </div>
       </div>
     `;
-    tile.querySelector('.product-tile').addEventListener('click', () => openPresentationModal(code));
+
+    tile.querySelector('.product-tile').addEventListener('click', () => openPresentationModal(flavor));
     productGrid.appendChild(tile);
   });
 }
 
-let currentProductCode = null;
+let currentFlavor = null;
 
-function openPresentationModal(code) {
-  currentProductCode = code;
-  document.getElementById('modal-product-name').textContent = PRODUCTS[code].descripcion;
-  document.getElementById('qty-1lt').value = selectedProducts[code]?.['1LT'] || 0;
-  document.getElementById('qty-500ml').value = selectedProducts[code]?.['500ML'] || 0;
+function openPresentationModal(flavor) {
+  currentFlavor = flavor;
+
+  const data = selectedProducts[flavor] || {};
+  const presentations = FLAVOR_MAP[flavor];
+
+  document.getElementById('modal-product-name').textContent = flavor;
+
+  const price1lt = presentations['1.5 Lts']?.precio?.toFixed(2) || '—';
+  const price500ml = presentations['500 ml']?.precio?.toFixed(2) || '—';
+
+  document.getElementById('qty-1lt').value = data['1.5 Lts']?.cantidad || 0;
+  document.getElementById('qty-500ml').value = data['500 ml']?.cantidad || 0;
+
+  document.querySelector("#label-1lt").textContent = `1.5 Lts ($${price1lt})`;
+  document.querySelector("#label-500ml").textContent = `500 ml ($${price500ml})`;
+
   presentationModal.show();
 }
 
@@ -229,44 +268,46 @@ document.getElementById('confirm-quantity-btn').addEventListener('click', () => 
   const q2 = parseInt(document.getElementById('qty-500ml').value || 0);
 
   if (q1 === 0 && q2 === 0) {
-    delete selectedProducts[currentProductCode];
+    delete selectedProducts[currentFlavor];
   } else {
-    selectedProducts[currentProductCode] = {
-      '1LT': q1,
-      '500ML': q2
-    };
+    const flavorData = {};
+    if (q1 > 0 && FLAVOR_MAP[currentFlavor]['1.5 Lts']) {
+      flavorData['1.5 Lts'] = {
+        cantidad: q1,
+        codigoProducto: FLAVOR_MAP[currentFlavor]['1.5 Lts'].codigoProducto
+      };
+    }
+    if (q2 > 0 && FLAVOR_MAP[currentFlavor]['500 ml']) {
+      flavorData['500 ml'] = {
+        cantidad: q2,
+        codigoProducto: FLAVOR_MAP[currentFlavor]['500 ml'].codigoProducto
+      };
+    }
+    selectedProducts[currentFlavor] = flavorData;
   }
-
+  
   updateOrderSummary();
-  renderProductTiles(); // Re-render to update tile border
+  renderProductTiles();
   presentationModal.hide();
+ 
 });
 
 function updateOrderSummary() {
   const orderSummary = document.getElementById('order-summary');
   orderSummary.innerHTML = '';
+  let total = 0;
 
-  Object.entries(selectedProducts).forEach(([code, qtys]) => {
-    const item = PRODUCTS[code];
-    if (qtys['1LT'] > 0) {
+  Object.entries(selectedProducts).forEach(([flavor, presentations]) => {
+    Object.entries(presentations).forEach(([size, entry]) => {
+      const product = FLAVOR_MAP[flavor][size];
+      const subtotal = product.precio * entry.cantidad;
+      total += subtotal;
       orderSummary.innerHTML += `<li class="list-group-item">
-        ${qtys['1LT']} × ${item.descripcion} (1LT) - $${(item.precio * qtys['1LT']).toFixed(2)}
+        ${entry.cantidad} × ${product.descripcion} - $${subtotal.toFixed(2)}
       </li>`;
-    }
-    if (qtys['500ML'] > 0) {
-      orderSummary.innerHTML += `<li class="list-group-item">
-        ${qtys['500ML']} × ${item.descripcion} (500ML) - $${(item.precio * qtys['500ML']).toFixed(2)}
-      </li>`;
-    }
+    });
   });
 
-  // Optional: update total cost
-  let total = 0;
-  for (let code in selectedProducts) {
-    const item = PRODUCTS[code];
-    total += item.precio * (selectedProducts[code]['1LT'] || 0);
-    total += item.precio * (selectedProducts[code]['500ML'] || 0);
-  }
   document.getElementById('total-cost').textContent = total.toFixed(2);
 }
 
@@ -274,21 +315,25 @@ function updateOrderSummary() {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const name = form.name.value.trim();
-  const telefono = form.telefono.value.trim();
-  if (!name || !telefono) return alert('Faltan datos del cliente.');
+  //const name = form.name.value.trim();
+  //const telefono = form.telefono.value.trim();
+  if (!currentClient?.nombre || !currentClient?.telefono) {
+    alert('Faltan datos del cliente.');
+    return;
+  }
+
 
   const promo = form.promo.value.trim();
 
   const items = [];
 
-  for (let code in selectedProducts) {
-    const entry = selectedProducts[code];
-    if (entry['1LT'] > 0) {
-      items.push({ codigoProducto: code, cantidad: entry['1LT'], presentacion: '1LT' });
-    }
-    if (entry['500ML'] > 0) {
-      items.push({ codigoProducto: code, cantidad: entry['500ML'], presentacion: '500ML' });
+   for (let flavor in selectedProducts) {
+    const entries = selectedProducts[flavor];
+    for (let size in entries) {
+      const { cantidad, codigoProducto } = entries[size];
+      if (cantidad > 0) {
+        items.push({ codigoProducto, cantidad, presentacion: size });
+      }
     }
   }  
 
@@ -315,9 +360,9 @@ form.addEventListener('submit', async (e) => {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ 
-        codigoCliente: currentClient?.codigoCliente || '',
-        nombre: currentClient?.nombre || '', 
-        telefono,
+        codigoCliente: currentClient.codigoCliente,
+        nombre: currentClient.nombre, 
+        telefono: currentClient.nombre,
         codigoVendedor: currentClient?.codigoVendedor || '',
         promo, 
         items,
@@ -454,6 +499,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
 
