@@ -1,0 +1,1 @@
+/* FRUGY app bootstrap */

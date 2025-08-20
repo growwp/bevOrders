@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+dist/
+.cache/
+# design sources stay out of git
+design/
+*.psd
+*.ai
+*.sketch
+*.fig
