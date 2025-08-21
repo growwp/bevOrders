@@ -36,6 +36,27 @@
       transition: transform .12s ease, box-shadow .12s ease;
     }
     .product-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+    
+    :root { --tile-max: 220px; } /* try 180–240px until it feels right */
+
+    .product-tile {
+      max-width: var(--tile-max);   /* prevents huge cards */
+      margin: 0 auto;               /* center inside the column */
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .product-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+
+    .tile-img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;   /* perfect square */
+      object-fit: contain;     /* fills the square, crops edges */
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
 
   </style>
 </head>
@@ -252,7 +273,7 @@ function renderProductTiles() {
   productGrid.innerHTML = '';
   productList.forEach(flavor => {
     const tile = document.createElement('div');
-    tile.className = 'col-4';
+    tile.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
     const hasSelection = selectedProducts[flavor];
 
     tile.innerHTML = `
