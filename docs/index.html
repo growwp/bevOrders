@@ -21,7 +21,22 @@
      /* ✅ Hide placeholder when dropdown is opened */
     select:focus option[disabled] {
     display: none;
-  }
+    }
+    /* --- Tiles --- */
+    .tile-img {
+      width: 100%;
+      aspect-ratio: 1/1;   /* keeps tiles square */
+      object-fit: cover;   /* crops without distortion */
+      display: block;
+    }
+    .product-tile {
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .product-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+
   </style>
 </head>
 <body>
@@ -175,6 +190,18 @@ let FLAVOR_MAP = {};
 let currentClient = null; //Will hold authenticated client info
 const MAX_ITEMS = 3;
 
+// Map flavor → image path (case-insensitive)
+const TILE_IMAGES = {
+  MANZANA: "assets/img/tiles/Manzanaw.webp",
+  NARANJA: "assets/img/tiles/Naranjaw.webp",
+  PERA:    "assets/img/tiles/Peraw.webp",
+};
+
+function tileImgFor(flavor) {
+  const key = String(flavor || "").toUpperCase();
+  return TILE_IMAGES[key] || "assets/img/tiles/frugybyvw.webp"; // fallback
+}
+
 const form = document.getElementById('order-form');
 //dropdown logic
 //const addBtn = document.getElementById('add-btn');
@@ -230,6 +257,10 @@ function renderProductTiles() {
 
     tile.innerHTML = `
       <div class="card product-tile ${hasSelection ? 'border-primary' : ''}" data-flavor="${flavor}" style="cursor:pointer;">
+        <img class="tile-img card-img-top"
+             src="${tileImgFor(flavor)}"
+             alt="FRUGY ${flavor}" loading="lazy" decoding="async"
+             width="500" height="500">
         <div class="card-body text-center">
           <h5 class="card-title">${flavor}</h5>
         </div>
@@ -362,7 +393,7 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({ 
         codigoCliente: currentClient.codigoCliente,
         nombre: currentClient.nombre, 
-        telefono: currentClient.nombre,
+        telefono: currentClient.telefono,
         codigoVendedor: currentClient?.codigoVendedor || '',
         promo, 
         items,
